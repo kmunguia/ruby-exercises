@@ -152,5 +152,8 @@ describe RetailTransaction do
     it "cannot be reopened" do
       assert_invalid_transition { tx.reopen! }
     end
+    it "can be refunded" do
+      assert_equal true, tx.settled?
+      tx.refund!
   end
 end
