@@ -12,6 +12,7 @@ describe RetailTransaction do
     assert_equal false, tx.processing_payment?
     assert_equal false, tx.settled?
     assert_equal false, tx.payment_declined?
+    assert_equal false, tx.refunded?
   end
 
   it "starts out empty" do
@@ -40,6 +41,11 @@ describe RetailTransaction do
         tx.payment_info = "15 cents and a nail"
       end
     end
+
+    it "cannot refund item" do
+      assert_invalid_transition {tx.refund!}
+    end
+
   end
 
   describe "collecting payment" do
@@ -103,6 +109,11 @@ describe RetailTransaction do
       assert_equal false, tx.settled?
       assert_equal true,  tx.payment_declined?
     end
+
+    it "cannot refund before processing payment" do
+      assert_equal false, tx.refunded
+    end
+
   end
 
   describe "with declined payment" do
@@ -138,6 +149,10 @@ describe RetailTransaction do
       assert_equal false, tx.payment_declined?
       assert_equal true,  tx.processing_payment?
     end
+
+    it "cannot be refunded" do 
+      assert_equal false, tx.settled?
+      assert_equal false, tx.refunded?
   end
 
   describe "that is settled" do
@@ -155,5 +170,40 @@ describe RetailTransaction do
     it "can be refunded" do
       assert_equal true, tx.settled?
       tx.refund!
+    end
+
   end
+
+  describe "payment is refunded" do
+    before(:each) do
+      tx.add_item("bobcat")
+      tx.checkout!
+      tx.payment_info = "15 cents and a nail"
+      tx.process_payment!
+      tx.payment_authorized!
+      tx.settled!
+    end
+
+    it "can be refunded" do
+      assert_equal true tx.settled?
+      tx.reopen!
+      tx.payment_info = "15 cents and a nail"
+      assert_equal false tx.process_payment?
+      assert_equal false tx.payment_authorized?
+      assert_equal false tx.payment_declined?
+      
+    end
+
+    it "cannot be refunded more than once" do
+      assert_equal true tx.settled?
+      assert_equal true tx.refunded?
+      assert_invalid_transition { tx.refund! }
+    end
+
+    it "cannot be reponed once refunded" do
+      assert_equal true tx.refund?
+      assert_equal false tx.ringing_up?
+      assert_invalid_transition { tx.reopen!}
+    end 
+
 end
