@@ -2,6 +2,9 @@ require_relative "test_helper"
 
 # Note: assert_invalid_transition is defined in test_helper.rb
 
+require "minitest/reporters"
+Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
+
 describe RetailTransaction do
 
   let(:tx) { RetailTransaction.new }
@@ -43,7 +46,7 @@ describe RetailTransaction do
     end
 
     it "cannot refund item" do
-      assert_invalid_transition {tx.refund!}
+      assert_invalid_transition { tx.refund! }
     end
 
   end
@@ -171,7 +174,6 @@ describe RetailTransaction do
       assert_equal true, tx.settled?
       tx.refund!
     end
-
   end
 
   describe "payment is refunded" do
@@ -185,25 +187,26 @@ describe RetailTransaction do
     end
 
     it "can be refunded" do
-      assert_equal true tx.settled?
+      assert_equal true, tx.settled?
       tx.reopen!
       tx.payment_info = "15 cents and a nail"
-      assert_equal false tx.process_payment?
-      assert_equal false tx.payment_authorized?
-      assert_equal false tx.payment_declined?
+      assert_equal false, tx.process_payment?
+      assert_equal false, tx.payment_authorized?
+      assert_equal false, tx.payment_declined?
       
     end
 
     it "cannot be refunded more than once" do
-      assert_equal true tx.settled?
-      assert_equal true tx.refunded?
+      assert_equal true, tx.settled?
+      assert_equal true, tx.refunded?
       assert_invalid_transition { tx.refund! }
     end
 
     it "cannot be reponed once refunded" do
-      assert_equal true tx.refund?
-      assert_equal false tx.ringing_up?
+      assert_equal false, tx.reopen?
+      assert_equal true, tx.refund?
+      assert_equal false, tx.ringing_up?
       assert_invalid_transition { tx.reopen!}
     end 
-
+  end
 end
