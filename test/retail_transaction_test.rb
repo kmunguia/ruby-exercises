@@ -156,6 +156,7 @@ describe RetailTransaction do
     it "cannot be refunded" do 
       assert_equal false, tx.settled?
       assert_equal false, tx.refunded?
+    end
   end
 
   describe "that is settled" do
