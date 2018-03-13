@@ -64,7 +64,7 @@ class RetailTransaction
     end
     
     event :refund do
-      transitions from :settled, to: :refund
+      transitions from: :settled, to: :refund
     end
   end
 end
